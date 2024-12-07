@@ -1,0 +1,10 @@
+service: {{ appName }}
+image: {{ username }}/{{ appName }}
+servers:
+  - {{ ipAddress }}
+registry:
+  username:
+    - KAMAL_REGISTRY_USERNAME
+  password:
+    - KAMAL_REGISTRY_PASSWORD
+port: {{ port }}

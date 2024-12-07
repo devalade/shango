@@ -1,167 +1,48 @@
 #!/usr/bin/bash
 
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-RED='\033[0;31m'
-BLUE='\033[0;34m'
-NC='\033[0m'
+source ~/Code/shango/ascii.sh
+source ~/Code/shango/utils/global-variables.sh
+source ~/Code/shango/utils/replace-variables.sh
 
-REPLY=""
-
-FRAMEWORKS=(
-  "NextJS"
-  "Remix"
-  "Tanstack Start Framework"
-  "Svelte"
-  "AdonisJS"
-  "NestJS"
-  "Astro"
-  "Laravel"
-  "Django"
-)
-
-JS_PACKAGE_MANAGERS=(
-  "npm"
-  "yarn"
-  "pnpm"
-)
-
-DATABASES=(
-  "No Database"
-  "MySQL"
-  "Postgres"
-  "SQLite"
-)
-
-CACHED_DATABASES=(
-  "No Cache"
-  "Redis"
-  "Memcached"
-  "KeyDB"
-)
-
-just_test() {
-  local prompt="$1"
-  echo "$1"
-}
-
-select_with_menu() {
-  local prompt="$1"
-  REPLY=""
-  shift
-  local options=("$@")
-  local selected=0
-
-  while true; do
-    clear
-    echo -e "${BLUE}${prompt}:${NC}"
-
-    # Display options
-    for i in "${!options[@]}"; do
-      if [[ $i -eq $selected ]]; then
-        echo -e "${YELLOW}-> ${options[i]}${NC}"
-      else
-        echo "   ${options[i]}"
-      fi
-    done
-
-    # Read key input (handle arrow keys)
-    read -rsn1 key
-
-    if [[ $key == $'\e' ]]; then
-      read -rsn2 key # Read two more characters for arrow keys
-      case "$key" in
-      '[A') # Up arrow
-        ((selected--))
-        [[ $selected -lt 0 ]] && selected=$((${#options[@]} - 1))
-        ;;
-      '[B') # Down arrow
-        ((selected++))
-        [[ $selected -ge ${#options[@]} ]] && selected=0
-        ;;
-      esac
-    elif [[ $key == "" ]]; then    # Enter key pressed
-      REPLY="${options[selected]}" # Output the selected option
-      return                       # Exit the function after selection
-    fi
-  done
-}
-
-# generate_dockerfile() {
-  local framework="$1"
-  local package_manager="${2:-npm}"
-
-  cat >Dockerfile <<EOL
-FROM node:20-alpine
-WORKDIR /app
-COPY package*.json ./
-RUN ${package_manager} install
-COPY . .
-RUN ${package_manager} run build
-EXPOSE 3000
-CMD ["${package_manager}", "run", "start"]
-EOL
-}
-
-generate_kamal_config() {
-  local framework="$1"
-  local package_manager="$2"
-  local database="$3"
-  local cached_db="$4"
-
-  mkdir -p config
-
-  cat >config/deploy.yml <<EOL
-service: ${framework,,}-app
-image: ${framework,,}-app
-
-servers:
-  - 192.168.1.100
-
-registry:
-  username: ${USER}
-
-env:
-  secret:
-    - DATABASE_URL
-    - CACHED_DB_URL
-
-volumes:
-  - "/path/to/storage:/app/storage"
-
-traefik:
-  port: 3000
-
-healthcheck:
-  path: /health
-  interval: 10s
-  max_attempts: 3
-EOL
-
-  generate_dockerfile "$framework" "$package_manager"
-}
+echo ""
 
 main() {
-  clear
+  local username
+  local appName
+  local ipAddress
+  local port
+
   echo -e "${YELLOW}🚀 Shango Deployment Configuration CLI${NC}"
   echo -e "${BLUE}Use UP/DOWN arrows to navigate, ENTER to select${NC}"
 
-  select_with_menu "Select Framework" "${FRAMEWORKS[@]}"
-  SELECTED_FRAMEWORK="$REPLY"
-  echo -e "${GREEN}Selected Framework: ${SELECTED_FRAMEWORK}${NC}"
+  appName=$(gum input --placeholder "My next one billions ideas")
+  username=$(gum input --value $USER --placeholder "Enter your registry username: ")
+  ipAddress=$(gum input --placeholder "Enter IP Address: ")
+  port=$(gum input --placeholder "Enter Port (default: 3000): ")
 
-  PACKAGE_MANAGER=""
+  FRAMEWORK=$(gum choose "${FRAMEWORKS[@]}")
+  echo -e "${GREEN}Selected Framework: ${FRAMEWORK}${NC}"
+
   if [[ ! "$SELECTED_FRAMEWORK" =~ ^(Laravel|Django)$ ]]; then
-    select_with_menu "Select Package Manager" "${JS_PACKAGE_MANAGERS[@]}"
-    PACKAGE_MANAGER="$REPLY"
+    PACKAGE_MANAGER=$(gum choose "${JS_PACKAGE_MANAGERS[@]}")
     echo -e "${GREEN}Selected Package Manager: ${PACKAGE_MANAGER}${NC}"
+
+    SELECTED_DATABASE=$(gum choose "${DATABASES[@]}")
+    echo -e "${GREEN}Selected Database: ${SELECTED_DATABASE}${NC}"
+
+    CACHED_DATABASE=$(gum choose "${CACHED_DATABASES[@]}")
+    echo -e "${GREEN}Selected Cached Database: ${CACHED_DATABASE}${NC}"
+  else
+
+    SELECTED_DATABASE=$(gum choose "${DATABASES[@]}")
+    echo -e "${GREEN}Selected Database: ${SELECTED_DATABASE}${NC}"
+
+    CACHED_DATABASE=$(gum choose "${CACHED_DATABASES[@]}")
+    echo -e "${GREEN}Selected Cached Database: ${CACHED_DATABASE}${NC}"
   fi
 
-  select_with_menu "Select Database" "${DATABASES[@]}"
-  SELECTED_DATABASE="$REPLY"
-  echo -e "${GREEN}Selected Database: ${SELECTED_DATABASE}${NC}"
-
-  generate_kamal_config "$SELECTED_FRAMEWORK" "$PACKAGE_MANAGER" "$SELECTED_DATABASE" "$CACHED_DATABASE"
+  local template="$SHANGO_PATH/stubs/${FRAMEWORK,,}"
+  replace_variables "$template" "$username" "$appName" "$ipAddress" "$port"
 }
 
 main
