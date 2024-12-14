@@ -8,7 +8,7 @@ ascii_art='_________.__
         \/      \/     \/     \//_____/         '
 
 echo -e "$ascii_art"
-echo "=> Shango is Linux base system!"
+echo "=> Shango is Linux base tools!"
 echo -e "\nBegin installation (or abort with ctrl+c)..."
 
 sudo apt-get update >/dev/null
