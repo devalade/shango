@@ -31,8 +31,12 @@ show_progress() {
   printf "    \b\b\b\b"
 }
 
+(
+  git clone https://github.com/devalade/shango.git ~/.local/share/shango
+) &
+
 show_progress $!
-git clone https://github.com/devalade/shango.git ~/.local/share/shango >/dev/null
+
 if [[ $SHANGO_REF != "main" ]]; then
   cd ~/.local/share/shango
   git fetch origin "${SHANGO_REF:-stable}" && git checkout "${SHANGO_REF:-stable}"
