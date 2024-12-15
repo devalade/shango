@@ -36,4 +36,4 @@ CACHED_DATABASES=(
   "KeyDB"
 )
 
-SHANGO_PATH="$HOME/Code/shango"
+SHANGO_HOME="$HOME/.local/share/shango"

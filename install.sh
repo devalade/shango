@@ -1,4 +1,6 @@
 set -e
+source ./utils/global-variables.sh
+source ./utils/prompt-to-add-path.sh
 
 ascii_art='_________.__                                  
  /   _____/|  |__ _____    ____    ____   ____  
@@ -27,3 +29,5 @@ echo "Installation starting..."
 echo ""
 echo "Installing gum for better experience."
 source ~/.local/share/shango/dependencies/app-gum.sh >/dev/null
+
+prompt_to_add_path

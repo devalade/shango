@@ -41,7 +41,7 @@ main() {
     echo -e "${GREEN}Selected Cached Database: ${CACHED_DATABASE}${NC}"
   fi
 
-  local template="$SHANGO_PATH/stubs/${FRAMEWORK,,}"
+  local template="$SHANGO_HOME/stubs/${FRAMEWORK,,}"
   replace_variables "$template" "$username" "$appName" "$ipAddress" "$port"
 }
 
