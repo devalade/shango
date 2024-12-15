@@ -26,4 +26,4 @@ fi
 echo "Installation starting..."
 echo ""
 echo "Installing gum for better experience."
-source ~/.local/share/shango/install/terminal/required/app-gum.sh >/dev/null
+source ~/.local/share/shango/dependencies/app-gum.sh >/dev/null
