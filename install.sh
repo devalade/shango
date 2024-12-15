@@ -17,6 +17,20 @@ sudo apt-get install -y git >/dev/null
 echo "Cloning Shango..."
 rm -rf ~/.local/share/shango
 
+show_progress() {
+  local pid=$1
+  local delay=0.5
+  local spinstr='|/-\'
+  while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
+    local temp=${spinstr#?}
+    printf " [%c]  " "$spinstr"
+    local spinstr=$temp${spinstr%"$temp"}
+    sleep $delay
+    printf "\b\b\b\b\b\b"
+  done
+  printf "    \b\b\b\b"
+}
+
 show_progress $!
 git clone https://github.com/devalade/shango.git ~/.local/share/shango >/dev/null
 if [[ $SHANGO_REF != "main" ]]; then
@@ -35,17 +49,3 @@ echo "Installing gum for better experience."
 source ~/.local/share/shango/dependencies/app-gum.sh >/dev/null
 
 prompt_to_add_path
-
-show_progress() {
-  local pid=$1
-  local delay=0.5
-  local spinstr='|/-\'
-  while [ "$(ps a | awk '{print $1}' | grep $pid)" ]; do
-    local temp=${spinstr#?}
-    printf " [%c]  " "$spinstr"
-    local spinstr=$temp${spinstr%"$temp"}
-    sleep $delay
-    printf "\b\b\b\b\b\b"
-  done
-  printf "    \b\b\b\b"
-}
