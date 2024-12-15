@@ -43,9 +43,9 @@ show_progress $!
 #   cd -
 # fi
 
-source ~/.local/utils/global-variables.sh
-source ~/.local/utils/prompt-to-add-path.sh
-source ~/.local/utils/show_progress
+source ~/.local/share/shango/utils/global-variables.sh
+source ~/.local/share/shango/utils/prompt-to-add-path.sh
+source ~/.local/share/shango/utils/show_progress.sh
 
 echo "Installation starting..."
 echo ""
