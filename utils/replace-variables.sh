@@ -1,4 +1,4 @@
-source ~/Code/shango/utils/global-variables.sh
+source $HOME/.local/utils/global-variables.sh
 
 replace_variables() {
   local template_path="$1"
