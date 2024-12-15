@@ -1,8 +1,8 @@
 #!/usr/bin/bash
 
-source ~/Code/shango/ascii.sh
-source ~/Code/shango/utils/global-variables.sh
-source ~/Code/shango/utils/replace-variables.sh
+source ~/.local/share/shango/ascii.sh
+source ~/.local/share/shango/utils/global-variables.sh
+source ~/.local/share/shango/utils/replace-variables.sh
 
 echo ""
 

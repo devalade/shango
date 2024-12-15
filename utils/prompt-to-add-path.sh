@@ -1,4 +1,4 @@
-source $HOME/.local/utils/global-variables.sh
+source $HOME/.local/share/shango/utils/global-variables.sh
 
 prompt_to_add_path() {
   # Detect the shell type
