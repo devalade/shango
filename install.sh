@@ -1,6 +1,6 @@
 set -e
-source ./utils/global-variables.sh
-source ./utils/prompt-to-add-path.sh
+source $HOME/.local/utils/global-variables.sh
+source $HOME/.local/utils/prompt-to-add-path.sh
 
 ascii_art='_________.__                                  
  /   _____/|  |__ _____    ____    ____   ____  
