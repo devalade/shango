@@ -37,15 +37,15 @@ show_progress() {
 
 show_progress $!
 
-if [[ $SHANGO_REF != "main" ]]; then
-  cd ~/.local/share/shango
-  git fetch origin "${SHANGO_REF:-stable}" && git checkout "${SHANGO_REF:-stable}"
-  cd -
-fi
+# if [[ $SHANGO_REF != "main" ]]; then
+#   cd ~/.local/share/shango
+#   git fetch origin "${SHANGO_REF:-stable}" && git checkout "${SHANGO_REF:-stable}"
+#   cd -
+# fi
 
-source $HOME/.local/utils/global-variables.sh
-source $HOME/.local/utils/prompt-to-add-path.sh
-source $HOME/.local/utils/show_progress
+source ~/.local/utils/global-variables.sh
+source ~/.local/utils/prompt-to-add-path.sh
+source ~/.local/utils/show_progress
 
 echo "Installation starting..."
 echo ""
