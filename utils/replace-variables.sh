@@ -4,8 +4,9 @@ replace_variables() {
   local template_path="$1"
   local username="${2:-}"
   local appName="${3:-}"
-  local ipAddress="${4:-}"
-  local port="${5:-3000}"
+  local domainName="${4:-}"
+  local ipAddress="${5:-}"
+  local port="${6:-3000}"
 
   local deploy_input_file="$template_path/deploy.yml.stub"
   local deploy_output_file="deploy.yml"
@@ -13,13 +14,25 @@ replace_variables() {
   local dockerfile_input_file="$template_path/Dockerfile.stub"
   local dockerfile_output_file="Dockerfile"
 
-  mkdir -p config # Create the folder (if it doesn't exist)
+  sudo mkdir -p config
+  sudo chmod 755 config # Ensure the directory has the correct permissions
 
-  sed -e "s/{{ username }}/${username}/g" \
+  if [ -f "config/$deploy_output_file" ]; then
+    sudo rm -rf "config/$deploy_output_file"
+  fi
+
+  sudo sed -e "s/{{ username }}/${username}/g" \
     -e "s/{{ appName }}/${appName}/g" \
     -e "s/{{ ipAddress }}/${ipAddress}/g" \
+    -e "s/{{ domainName }}/${domainName}/g" \
     -e "s/{{ port }}/${port}/g" \
-    "$deploy_input_file" >"config/$deploy_output_file"
+    "$deploy_input_file" | sudo tee "config/$deploy_output_file" >/dev/null
+
+  sudo chmod 644 "config/$deploy_output_file" # Ensure the file has the correct permissions after creation
+
+  if [ -f "$dockerfile_output_file" ]; then
+    rm -rf "$dockerfile_output_file"
+  fi
 
   sed -e "s/{{ port }}/${username}/g" \
     "$dockerfile_input_file" >"$dockerfile_output_file"

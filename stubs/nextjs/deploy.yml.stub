@@ -1,10 +1,33 @@
 service: {{ appName }}
 image: {{ username }}/{{ appName }}
+
+env:
+  secret:
+    - EXAMPLE_SECRET
+
 servers:
   - {{ ipAddress }}
+
+proxy:
+  app_port:  {{ port }}
+  ssl: true
+  host: {{ domainName }}
+  healthcheck:
+    path: /
+    interval: 5
+
 registry:
   username:
     - KAMAL_REGISTRY_USERNAME
   password:
     - KAMAL_REGISTRY_PASSWORD
-port: {{ port }}
+
+builder:
+  arch: amd64
+  remote: ssh://{{ domainName }}
+  cache:
+    type: registry
+    options: mode=max
+    image: {{ username }}/{{ appName }}-build-cache
+
+asset_path: /app/.next
