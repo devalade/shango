@@ -9,6 +9,7 @@ echo ""
 main() {
   local username
   local appName
+  local domainName
   local ipAddress
   local port
 
@@ -17,6 +18,7 @@ main() {
 
   appName=$(gum input --placeholder "My next one billions ideas")
   username=$(gum input --value $USER --placeholder "Enter your registry username: ")
+  domainName=$(gum input --value $(echo "www.$appName.com") --placeholder "Enter your domain name: ")
   ipAddress=$(gum input --placeholder "Enter IP Address: ")
   port=$(gum input --placeholder "Enter Port (default: 3000): ")
 
@@ -42,7 +44,7 @@ main() {
   fi
 
   local template="$SHANGO_HOME/stubs/${FRAMEWORK,,}"
-  replace_variables "$template" "$username" "$appName" "$ipAddress" "$port"
+  replace_variables "$template" "$username" "$appName" "$domainName" "$ipAddress" "$port"
 }
 
 main
