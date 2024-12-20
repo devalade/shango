@@ -1,42 +1,55 @@
-source $HOME/.local/share/shango/utils/global-variables.sh
+#!/bin/bash
 
 replace_variables() {
   local template_path="$1"
-  local username="${2:-}"
-  local appName="${3:-}"
-  local domainName="${4:-}"
-  local ipAddress="${5:-}"
+  local username="$2"
+  local appName="$3"
+  local domainName="$4"
+  local ipAddress="$5"
   local port="${6:-3000}"
+  local selected_database="${7:-No Database}"
+  local cached_database="${8:-No Cache}"
 
-  local deploy_input_file="$template_path/deploy.yml.stub"
-  local deploy_output_file="deploy.yml"
+  # Create temporary files
+  local temp_file=$(mktemp)
+  local final_file="config/deploy.yml"
 
-  local dockerfile_input_file="$template_path/Dockerfile.stub"
-  local dockerfile_output_file="Dockerfile"
+  # Start with base configuration
+  cat "$template_path/base/deploy.yml.stub" >"$temp_file"
 
-  sudo mkdir -p config
-  sudo chmod 755 config # Ensure the directory has the correct permissions
-
-  if [ -f "config/$deploy_output_file" ]; then
-    sudo rm -rf "config/$deploy_output_file"
+  # Add database configuration if selected
+  if [ "$selected_database" != "No Database" ]; then
+    yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' \
+      "$temp_file" "$template_path/databases/${selected_database,,}.yml.stub" >"$temp_file.new"
+    mv "$temp_file.new" "$temp_file"
   fi
 
-  sudo sed -e "s/{{ username }}/${username}/g" \
-    -e "s/{{ appName }}/${appName}/g" \
-    -e "s/{{ ipAddress }}/${ipAddress}/g" \
-    -e "s/{{ domainName }}/${domainName}/g" \
-    -e "s/{{ port }}/${port}/g" \
-    "$deploy_input_file" | sudo tee "config/$deploy_output_file" >/dev/null
-
-  sudo chmod 644 "config/$deploy_output_file" # Ensure the file has the correct permissions after creation
-
-  if [ -f "$dockerfile_output_file" ]; then
-    rm -rf "$dockerfile_output_file"
+  # Add cache configuration if selected
+  if [ "$cached_database" != "No Cache" ]; then
+    yq eval-all 'select(fileIndex == 0) * select(fileIndex == 1)' \
+      "$temp_file" "$template_path/cache/${cached_database,,}.yml.stub" >"$temp_file.new"
+    mv "$temp_file.new" "$temp_file"
   fi
 
-  sed -e "s/{{ port }}/${username}/g" \
-    "$dockerfile_input_file" >"$dockerfile_output_file"
+  # Replace variables in the combined file
+  sed -i \
+    -e "s|{{ username }}|$username|g" \
+    -e "s|{{ appName }}|$appName|g" \
+    -e "s|{{ domainName }}|$domainName|g" \
+    -e "s|{{ ipAddress }}|$ipAddress|g" \
+    -e "s|{{ port }}|$port|g" \
+    "$temp_file"
 
-  echo -e "${GREEN}Generated configuration: ${dockerfile_output_file}${NC}"
-  echo -e "${GREEN}Generated configuration: ${deploy_output_file}${NC}"
+  # Move to final location
+  mkdir -p config
+  mv "$temp_file" "$final_file"
+
+  # Handle Dockerfile - now using a single template
+  sed -e "s|{{ port }}|$port|g" \
+    "$template_path/base/Dockerfile.stub" >"Dockerfile"
+
+  # Set appropriate permissions
+  chmod 644 "config/deploy.yml" "Dockerfile"
+
+  echo "✨ Generated deploy.yml and Dockerfile for your ${selected_database} project"
 }
