@@ -1,15 +1,13 @@
 service: {{ appName }}
 image: {{ username }}/{{ appName }}
 
-env:
-  secret:
-    - EXAMPLE_SECRET
-
 servers:
-  - {{ ipAddress }}
+  web:
+    hosts:
+      - {{ ipAddress }}
 
 proxy:
-  app_port:  {{ port }}
+  app_port: {{ port }}
   ssl: true
   host: {{ domainName }}
   healthcheck:
@@ -23,7 +21,6 @@ registry:
     - KAMAL_REGISTRY_PASSWORD
 
 builder:
-  arch: amd64
   remote: ssh://{{ domainName }}
   cache:
     type: registry

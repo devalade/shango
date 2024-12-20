@@ -1,0 +1,12 @@
+volumes:
+  sqlite_data:
+    directory: /app/data
+
+env:
+  secret:
+    - DATABASE_URL
+
+accessories:
+  sqlite:
+    volumes:
+      - sqlite_data:/app/data

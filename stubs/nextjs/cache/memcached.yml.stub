@@ -1,0 +1,15 @@
+volumes:
+  memcached_data:
+    directory: /var/lib/memcached
+
+env:
+  secret:
+    - MEMCACHED_URL
+
+accessories:
+  memcached:
+    image: memcached:1.6
+    host: web
+    port: 11211
+    volumes:
+      - memcached_data:/var/lib/memcached

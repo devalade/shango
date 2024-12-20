@@ -1,0 +1,15 @@
+volumes:
+  redis_data:
+    directory: /var/lib/redis
+
+env:
+  secret:
+    - REDIS_URL
+
+accessories:
+  redis:
+    image: redis:7
+    host: web
+    port: 6379
+    volumes:
+      - redis_data:/data

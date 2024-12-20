@@ -1,10 +1,7 @@
 #!/usr/bin/bash
-
 source ~/.local/share/shango/ascii.sh
 source ~/.local/share/shango/utils/global-variables.sh
 source ~/.local/share/shango/utils/replace-variables.sh
-
-echo ""
 
 main() {
   local username
@@ -12,39 +9,81 @@ main() {
   local domainName
   local ipAddress
   local port
+  local selected_database
+  local cached_database
+  local framework
+  local package_manager
 
-  echo -e "${YELLOW}🚀 Shango Deployment Configuration CLI${NC}"
-  echo -e "${BLUE}Use UP/DOWN arrows to navigate, ENTER to select${NC}"
+  echo -e "\n${YELLOW}🚀 Shango Deployment Configuration CLI${NC}"
+  echo -e "${BLUE}Use UP/DOWN arrows to navigate, ENTER to select${NC}\n"
 
-  appName=$(gum input --placeholder "My next one billions ideas")
-  username=$(gum input --value $USER --placeholder "Enter your registry username: ")
-  domainName=$(gum input --value $(echo "www.$appName.com") --placeholder "Enter your domain name: ")
-  ipAddress=$(gum input --placeholder "Enter IP Address: ")
-  port=$(gum input --placeholder "Enter Port (default: 3000): ")
-
-  FRAMEWORK=$(gum choose "${FRAMEWORKS[@]}")
-  echo -e "${GREEN}Selected Framework: ${FRAMEWORK}${NC}"
-
-  if [[ ! "$SELECTED_FRAMEWORK" =~ ^(Laravel|Django)$ ]]; then
-    PACKAGE_MANAGER=$(gum choose "${JS_PACKAGE_MANAGERS[@]}")
-    echo -e "${GREEN}Selected Package Manager: ${PACKAGE_MANAGER}${NC}"
-
-    SELECTED_DATABASE=$(gum choose "${DATABASES[@]}")
-    echo -e "${GREEN}Selected Database: ${SELECTED_DATABASE}${NC}"
-
-    CACHED_DATABASE=$(gum choose "${CACHED_DATABASES[@]}")
-    echo -e "${GREEN}Selected Cached Database: ${CACHED_DATABASE}${NC}"
-  else
-
-    SELECTED_DATABASE=$(gum choose "${DATABASES[@]}")
-    echo -e "${GREEN}Selected Database: ${SELECTED_DATABASE}${NC}"
-
-    CACHED_DATABASE=$(gum choose "${CACHED_DATABASES[@]}")
-    echo -e "${GREEN}Selected Cached Database: ${CACHED_DATABASE}${NC}"
+  # Basic project information
+  appName=$(gum input --placeholder "My next one billions ideas" --value "")
+  if [[ -z "$appName" ]]; then
+    echo -e "${RED}Error: App name is required${NC}"
+    exit 1
   fi
 
-  local template="$SHANGO_HOME/stubs/${FRAMEWORK,,}"
-  replace_variables "$template" "$username" "$appName" "$domainName" "$ipAddress" "$port"
+  username=$(gum input --placeholder "Enter your registry username" --value "$USER")
+  domainName=$(gum input --placeholder "Enter your domain name" --value "www.$appName.com")
+  ipAddress=$(gum input --placeholder "Enter IP Address" --value "")
+  if [[ -z "$ipAddress" ]]; then
+    echo -e "${RED}Error: IP Address is required${NC}"
+    exit 1
+  fi
+
+  port=$(gum input --placeholder "Enter Port" --value "3000")
+
+  # Framework selection
+  framework=$(gum choose "${FRAMEWORKS[@]}")
+  echo -e "${GREEN}Selected Framework: ${framework}${NC}"
+
+  # Package manager selection for JS frameworks
+  if [[ ! "$framework" =~ ^(Laravel|Django)$ ]]; then
+    package_manager=$(gum choose "${JS_PACKAGE_MANAGERS[@]}")
+    echo -e "${GREEN}Selected Package Manager: ${package_manager}${NC}"
+  fi
+
+  # Database selection
+  selected_database=$(gum choose "${DATABASES[@]}")
+  echo -e "${GREEN}Selected Database: ${selected_database}${NC}"
+
+  # Cache selection
+  cached_database=$(gum choose "${CACHED_DATABASES[@]}")
+  echo -e "${GREEN}Selected Cache: ${cached_database}${NC}"
+
+  # Prepare template path
+  local template_path="$SHANGO_HOME/stubs/${framework,,}"
+
+  # Validate template directory exists
+  if [[ ! -d "$template_path" ]]; then
+    echo -e "${RED}Error: Template directory not found for ${framework}${NC}"
+    exit 1
+  fi
+
+  # Generate configuration files
+  echo -e "\n${BLUE}Generating configuration files...${NC}"
+  replace_variables \
+    "$template_path" \
+    "$username" \
+    "$appName" \
+    "$domainName" \
+    "$ipAddress" \
+    "$port" \
+    "$selected_database" \
+    "$cached_database"
+
+  # Print success message with next steps
+  echo -e "\n${GREEN}✨ Configuration generated successfully!${NC}"
+  echo -e "${BLUE}Next steps:${NC}"
+  echo -e "1. Review your configuration in config/deploy.yml"
+  echo -e "2. Review your Dockerfile"
+  echo -e "3. Run 'kamal setup' to initialize your deployment"
 }
 
+# Handle errors
+set -e
+trap 'echo -e "\n${RED}Error: Script failed${NC}" >&2' ERR
+
+# Run main function
 main
